@@ -1,0 +1,9 @@
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Domain\bin\Debug\netstandard2.1\Betgrab.Domain.deps.json
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Domain\bin\Debug\netstandard2.1\Betgrab.Domain.dll
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Domain\bin\Debug\netstandard2.1\Betgrab.Domain.pdb
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Domain\obj\Debug\netstandard2.1\Betgrab.Domain.AssemblyInfoInputs.cache
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Domain\obj\Debug\netstandard2.1\Betgrab.Domain.AssemblyInfo.cs
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Domain\obj\Debug\netstandard2.1\Betgrab.Domain.csproj.CoreCompileInputs.cache
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Domain\obj\Debug\netstandard2.1\Betgrab.Domain.dll
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Domain\obj\Debug\netstandard2.1\Betgrab.Domain.pdb
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Domain\obj\Debug\netstandard2.1\Betgrab.Domain.csprojAssemblyReference.cache

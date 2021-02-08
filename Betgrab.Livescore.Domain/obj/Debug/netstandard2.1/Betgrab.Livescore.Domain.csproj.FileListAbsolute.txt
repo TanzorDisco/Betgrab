@@ -1,0 +1,9 @@
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Livescore.Domain\bin\Debug\netstandard2.1\Betgrab.Livescore.Domain.deps.json
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Livescore.Domain\bin\Debug\netstandard2.1\Betgrab.Livescore.Domain.dll
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Livescore.Domain\bin\Debug\netstandard2.1\Betgrab.Livescore.Domain.pdb
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Livescore.Domain\obj\Debug\netstandard2.1\Betgrab.Livescore.Domain.csprojAssemblyReference.cache
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Livescore.Domain\obj\Debug\netstandard2.1\Betgrab.Livescore.Domain.AssemblyInfoInputs.cache
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Livescore.Domain\obj\Debug\netstandard2.1\Betgrab.Livescore.Domain.AssemblyInfo.cs
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Livescore.Domain\obj\Debug\netstandard2.1\Betgrab.Livescore.Domain.csproj.CoreCompileInputs.cache
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Livescore.Domain\obj\Debug\netstandard2.1\Betgrab.Livescore.Domain.dll
+C:\Users\ISungurov\source\repos\Betgrab\Betgrab.Livescore.Domain\obj\Debug\netstandard2.1\Betgrab.Livescore.Domain.pdb

@@ -1,0 +1,23 @@
+
+<div class="param-row">
+  <div>
+    <label>Select date</label>
+  </div>
+  <div>
+    <input type="date" [(ngModel)]="parseDate" (change)="outputDate()" />
+  </div>
+  <div>
+    <button class="btn btn-primary" (click)="parseDay()">Start parsing</button>
+  </div>
+</div>
+
+<br />
+
+<div class="outputs">
+  <div *ngFor="let o of outputs" class="output">
+    <strong>{{o.id}}</strong>
+    <pre class="mb-0" >
+      <span *ngFor="let message of o.messages">{{message}}</span>
+    </pre>
+  </div>
+</div>

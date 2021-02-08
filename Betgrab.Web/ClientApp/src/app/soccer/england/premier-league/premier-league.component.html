@@ -1,0 +1,6 @@
+<div *ngIf="data">
+  <div class="match" *ngFor="let e of data">
+    <span>{{e.club1}} <a [routerLink]="['/event', e.eventId]">{{e.tr1}} : {{e.tr2}}</a> {{e.club2}}</span>
+  </div>
+</div>
+
