@@ -44,7 +44,7 @@ namespace Betgrab.Domain.Entities
 		/// <summary>
 		/// Фамилия Имя
 		/// </summary>
-		public string FullName => $"{LastName} {FirstName}";
+		public string FullName => $"{LastName}-{FirstName}";
 
 		/// <summary>
 		/// Гражданство

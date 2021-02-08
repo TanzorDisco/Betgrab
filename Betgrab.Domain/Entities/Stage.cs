@@ -10,6 +10,7 @@ namespace Betgrab.Domain.Entities
 
 		public int Id { get; set;  }
 		public string LivescoreId { get; set;  }
+
 		public string Name { get; set; }
 
 		/// <summary>
