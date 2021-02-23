@@ -9,10 +9,7 @@ namespace Betgrab.Web.Hubs
 		{
 		}
 
-		public async Task ParseDate(string date)
-		{
-			// await Clients.All.SendAsync("OnWriteToLivescoreOutput", message);
-		}
-		
-	}
+        public async Task ParseDate(string date) => await new Task(() => { });
+
+    }
 }

@@ -23,6 +23,14 @@ namespace Betgrab.Web
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddCors(options => {
+				options.AddPolicy("BetgrabCorsPolicy", policies => {
+					policies.AllowAnyOrigin()
+						.AllowAnyHeader()
+						.AllowAnyMethod();
+				});
+			});
+
 			services.AddControllersWithViews();
 			// In production, the Angular files will be served from this directory
 			services.AddSpaStaticFiles(configuration =>
@@ -31,7 +39,7 @@ namespace Betgrab.Web
 			});
 
 			services.AddDbContext<BetgrabContext>(options =>
-				options.UseSqlServer(Configuration["ConnectionStrings:Betgrab"])
+				options.UseNpgsql(Configuration["ConnectionStrings:NpgsqlBetgrab"])
 			);
 
 			services.AddSignalR();
@@ -52,6 +60,8 @@ namespace Betgrab.Web
 				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 				app.UseHsts();
 			}
+
+			app.UseCors("BetgrabCorsPolicy");
 
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();

@@ -11,7 +11,7 @@ export class SignalrService {
   public newLivescoreCreated = new Subject<LivescoreOutput>();
   public livescoreOutput = new Subject<LivescoreOutputItem>();
   private hubConnection: HubConnection;
-  private connectionUrl = 'https://localhost:44380/betgrabhub';
+  private connectionUrl = 'https://localhost:5001/betgrabhub';
 
   constructor() { }
 
