@@ -15,6 +15,7 @@ namespace Betgrab.Domain.Entities
 		}
 
 		public int Id { get; set; }
+
 		/// <summary>
 		/// Идентификатор игрока в http://livescore.com
 		/// </summary>
