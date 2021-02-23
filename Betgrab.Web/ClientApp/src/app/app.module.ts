@@ -10,9 +10,8 @@ import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { PremierLeagueComponent } from './soccer/england/premier-league/premier-league.component';
 import { LaligaSantanderComponent } from './soccer/spain/laliga-santander/laliga-santander.component';
 import { EventViewComponent } from './soccer/event-view/event-view.component';
-import { LivescoreComponent } from './livescore/livescore.component';
 import { SignalrService } from './signalr.service';
-
+import { LivescoreModule } from './livescore/livescore.module';
 
 @NgModule({
   declarations: [
@@ -21,8 +20,7 @@ import { SignalrService } from './signalr.service';
     HomeComponent,
     PremierLeagueComponent,
     LaligaSantanderComponent,
-    EventViewComponent,
-    LivescoreComponent
+    EventViewComponent
   ],
   imports: [
     CommonModule,
@@ -32,10 +30,10 @@ import { SignalrService } from './signalr.service';
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'event/:id', component: EventViewComponent },
-      { path: 'livescore', component: LivescoreComponent },
       { path: 'england/premier-league', component: PremierLeagueComponent },
       { path: 'spain/laliga-santander', component: LaligaSantanderComponent },
     ]),
+    LivescoreModule
   ],
   providers: [SignalrService, DatePipe],
   bootstrap: [AppComponent]

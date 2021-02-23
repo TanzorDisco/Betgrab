@@ -21,16 +21,14 @@ namespace Betgrab.Web.Services.LiveScore
 
 		public void AddTask(string taskId, Task task)
 		{
-			lock(sync)
-			{
+			lock(sync) {
 				RunningTasks.Add(taskId, task);
 			}
 		}
 
 		public void RemoveTask(string taskId)
 		{
-			lock(sync)
-			{
+			lock(sync) {
 				RunningTasks.Remove(taskId);
 			}
 		}

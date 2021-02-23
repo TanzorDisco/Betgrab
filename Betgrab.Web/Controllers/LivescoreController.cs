@@ -14,7 +14,6 @@ namespace Betgrab.Web.Controllers
 	[Route("api/[controller]")]
 	public class LivescoreController : BetgrabController
 	{
-		private static object sync = new object();
 		private readonly Livescore _livescore;
 		private ILivescoreAdapter _liveScoreAdapter;
 		private ILivescoreService _livescoreService;
@@ -32,25 +31,30 @@ namespace Betgrab.Web.Controllers
 			_hubContext = hubContext;
 
 			_livescoreService = livescoreService;
-			_livescoreService.OnOutput += onLivescoreOutput;
+			_livescoreService.OnOutput += onOutput;
+			_livescoreService.OnProgress += onProgress;
 		}
 
 		[HttpGet("current")]
-		public IActionResult GetRunningTasks()
+		public async Task<IActionResult> GetRunningTasks()
 		{
-			return Ok(_livescore.RunningTasks.Keys);
+			return await Task.Run(() => Ok(_livescore.RunningTasks.Keys));
 		}
 
 		[HttpGet("parse/{date}")]
-		public IActionResult ParseDate(string date)
+		public async Task<IActionResult> ParseDate(string date)
 		{
+			_livescoreService.EventOutputOnly = true;
+
 			if (!_livescore.IsRunning(date))
 			{
 				_livescore.AddTask(date, null);
 
-				_hubContext.Clients.All.SendAsync("onNewOutput", new { id = date });
+				var dateTime = DateTime.Parse(date, new CultureInfo("en-US"));
+				
+				await _hubContext.Clients.All.SendAsync("onNewOutput", new { id = date });
 
-				_livescoreService.ParseDate(DateTime.Parse(date, new CultureInfo("en-US")));
+				await _livescoreService.ParseDateAsync(dateTime);
 
 				_livescore.RemoveTask(date);
 
@@ -62,9 +66,14 @@ namespace Betgrab.Web.Controllers
 			}
 		}
 
-		private void onLivescoreOutput(object sender, string date, string message)
+		private void onOutput(object sender, string date, string message)
 		{
 			_hubContext.Clients.All.SendAsync("onWriteToLivescoreOutput", new { id = date, message });
+		}
+
+		private void onProgress(object sender, string date, int progress) 
+		{
+			_hubContext.Clients.All.SendAsync("onLivescoreEventProgress", new { id = date, progress });
 		}
 
 		[HttpGet("soccer")]
@@ -78,18 +87,6 @@ namespace Betgrab.Web.Controllers
 		{
 			return Json(_liveScoreAdapter.GetEventData(eventId));
 		}
-
-		//[HttpGet("premierleague")]
-		//public IActionResult GetEnglandPremierLeague()
-		//{
-		//	return Json(_liveScoreAdapter.GetEnglandPremierLeague());
-		//}
-
-		//[HttpGet("laligasantander")]
-		//public IActionResult GetSpainLaligaSantander()
-		//{
-		//	return Json(_liveScoreAdapter.GetSpainLaligaSantander());
-		//}
 
 	}
 }

@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betgrab.Web", "Betgrab.Web\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Betgrab.Domain", "Betgrab.Domain\Betgrab.Domain.csproj", "{CE511F8E-BA56-4B5B-98BA-326B7F487D13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betgrab.Livescore.Domain", "Betgrab.Livescore.Domain\Betgrab.Livescore.Domain.csproj", "{3815CC31-8331-4DEA-B7FE-6B2AB4987DE2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

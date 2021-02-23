@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { Subject } from 'rxjs';
-import { LivescoreOutput, LivescoreOutputItem } from './livescore/livescore.models';
+import { LivescoreEventProgressData, LivescoreOutput, LivescoreOutputItem as LivescoreEventMessage } from './livescore/livescore.models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SignalrService {
 
-  public newLivescoreCreated = new Subject<LivescoreOutput>();
-  public livescoreOutput = new Subject<LivescoreOutputItem>();
+  public livescoreOutputCreated = new Subject<LivescoreOutput>();
+  public livescoreEventMessage = new Subject<LivescoreEventMessage>();
+  public livescoreEventProgress = new Subject<LivescoreEventProgressData>();
   private hubConnection: HubConnection;
   private connectionUrl = 'https://localhost:5001/betgrabhub';
 
@@ -32,7 +33,7 @@ export class SignalrService {
   }
 
   private startConnection() {
-    this.hubConnection = this.getConnection();
+    this.hubConnection = this.getConnection()
 
     this.hubConnection.start()
       .then(() => console.log('connection started'))
@@ -40,7 +41,8 @@ export class SignalrService {
   }
 
   private addListeners() {
-    this.hubConnection.on("onWriteToLivescoreOutput", (m: LivescoreOutputItem) => { this.livescoreOutput.next(m); });
-    this.hubConnection.on("onNewOutput", (o: LivescoreOutput) => { this.newLivescoreCreated.next(o); })
+    this.hubConnection.on("onWriteToLivescoreOutput", (m: LivescoreEventMessage) => { this.livescoreEventMessage.next(m); })
+    this.hubConnection.on("onNewOutput", (o: LivescoreOutput) => { this.livescoreOutputCreated.next(o); })
+    this.hubConnection.on("onLivescoreEventProgress", (o: LivescoreEventProgressData) => { this.livescoreEventProgress.next(o); })
   }
 }

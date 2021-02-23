@@ -1,0 +1,5 @@
+<div class="livescore-event-wrapper" *ngIf="data">
+    <div class="id-wrapper">{{data.id}}</div>
+    <span>{{data.currentEvent}}</span>
+    <div class="pt-1"><mat-progress-bar mode="determinate" value="{{data.progress}}"></mat-progress-bar></div>
+</div>

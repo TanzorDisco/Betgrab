@@ -4,53 +4,60 @@ using Betgrab.Web.Adapters;
 using Betgrab.Web.Adapters.Livescore.Event;
 using Betgrab.Web.Extensions;
 using Betgrab.Web.Services.Adapters.LiveScore;
-using Betgrab.Web.Services.LiveScore;
 using Microsoft.CSharp.RuntimeBinder;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Betgrab.Web.Services.LiveScore
 {
 	public delegate void OnLivescoreOutputEventHandler(object sender, string id, string message);
+	public delegate void OnLivescoreProgressEventHandler(object sender, string id, int progress);
 
 	public class LivescoreService : BaseService, ILivescoreService
 	{
 		private readonly string LIVESCORE = "livescore.com";
-		
 		private readonly ILivescoreAdapter _adapter;
 		private readonly IAnalogResolvingService _analogs;
-		
-
+		private readonly ILogger<LivescoreService> _logger;
 		public event OnLivescoreOutputEventHandler OnOutput;
-
+		public event OnLivescoreProgressEventHandler OnProgress;
+		public int EventProcessed { get; set; }
+        public int TotalEvents { get; set; }
+		public int Progress => Convert.ToInt32((decimal)EventProcessed / (decimal)TotalEvents * 100);
 		public ParsingInfo Info { get; set; }
+		public bool EventOutputOnly { get; set; }
+		public string TaskId { get; set; }
 
 		public LivescoreService(
 			BetgrabContext context, 
 			ILivescoreAdapter adapter,
 			IAnalogResolvingService analogResolvingService,
-			Livescore livescore) : base(context)
+			Livescore livescore,
+			ILogger<LivescoreService> logger) : base(context)
 		{
 			_adapter = adapter;
 			_analogs = analogResolvingService;
-			
+			_logger = logger;
 		}
 
 		public int ParseDate(DateTime date)
 		{
-			string taskId = date.ToString("yyyy-MM-dd");
+			TaskId = date.ToString("yyyy-MM-dd");
 
 			try
 			{
-				OnOutput?.Invoke(this, $"{taskId}", $"Start parsing day: {date:d MMM yyyy}");
+				OutputMessage($"Start parsing day: {date:d MMM yyyy}");
+
+				_logger.LogInformation($"{TaskId} {DateTime.Now}: Starting ParseDateInternal");
 
 				ParseDateInternal(date, out List<Analog> analogs);
 
-				var dist = analogs.Distinct();
+				_logger.LogInformation($"{TaskId} {DateTime.Now}: End ParseDateInternal");
 
-				OnOutput?.Invoke(this, $"{taskId}", $"Processing DTOs");
+				var dist = analogs.Distinct();
 
 				var newEntities = new List<IEntity>();
 
@@ -66,63 +73,76 @@ namespace Betgrab.Web.Services.LiveScore
 					.ToList()
 					.ForEach(a =>
 					{
+						var now = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff");
+
 						switch (a.Type)
 						{
 							case nameof(League):
+								_logger.LogInformation($"{TaskId} {now}: UpdateLeague");
 								var league = _analogs.ResolveLivescoreAnalog<League>(a);
 								UpdateLeague(a, league);
 								break;
 
 							case nameof(Nation):
+								_logger.LogInformation($"{TaskId} {now}: UpdateNation");
 								var nation = _analogs.ResolveLivescoreAnalog<Nation>(a);
 								UpdateNation(a, nation);
 								break;
 
 							case nameof(Stage):
+								_logger.LogInformation($"{TaskId} {now}: UpdateStage");
 								var stage = _analogs.ResolveLivescoreAnalog<Stage>(a);
 								UpdateStage(a, stage);
 								break;
 
 							case nameof(Event):
+								_logger.LogInformation($"{TaskId} {now}: UpdateEvent");
 								var ev = _analogs.ResolveLivescoreAnalog<Event>(a);
 								UpdateEvent(a, ev);
 								break;
 
 							case nameof(Club):
+								_logger.LogInformation($"{TaskId} {now}: UpdateClub");
 								var club = _analogs.ResolveLivescoreAnalog<Club>(a);
 								UpdateClub(a, club);
 								break;
 
 							case nameof(Player):
+								_logger.LogInformation($"{TaskId} {now}: UpdatePlayer");
 								UpdatePlayer(a, _analogs.ResolveLivescoreAnalog<Player>(a));
 								break;
 
 							case nameof(Fact):
+								_logger.LogInformation($"{TaskId} {now}: UpdateFact");
 								UpdateFact(a, _analogs.ResolveLivescoreAnalog<Fact>(a));
 								break;
 						}
 					});
 
+				_logger.LogInformation($"{TaskId} {DateTime.Now}: Done. Saving changes");
 
-				OnOutput?.Invoke(this, $"{taskId}", $"Done");
-				OnOutput?.Invoke(this, $"{taskId}", $"Saving changes");
+				OutputMessage("Done");
+				OutputMessage("Saving changes");
 
 				Ctx.SaveChanges();
 
-				OnOutput?.Invoke(this, $"{taskId}", $"Done");
+				_logger.LogInformation($"{TaskId} {DateTime.Now}: Changes successfully saved!");
+
+				OutputMessage("Done");
 
 				return 0;
 			}
 			catch (Exception exc)
 			{
-				OnOutput?.Invoke(this, $"{taskId}", $"Exception occured while parsing livescore day:\n{exc}");
+				OutputMessage($"Exception occured while parsing livescore day:\n{exc}");
 
 				return 1;
 			}
 		}
-		public int ParseEvent(int eventId)
+
+		public async Task<int> ParseDateAsync(DateTime date) 
 		{
-			return 0;
+			return await Task.Run<int>(() => this.ParseDate(date));
 		}
 
 		/// <summary>
@@ -134,16 +154,18 @@ namespace Betgrab.Web.Services.LiveScore
 		/// <returns></returns>
 		public int ParseDateInternal(DateTime date, out List<Analog> analogs)
 		{
-			string taskId = date.ToString("yyyy-MM-dd");
-			OnOutput?.Invoke(this, $"{taskId}", $"Getting data from livescore.com and parsing json");
+			OutputMessage($"Getting data from livescore.com and parsing json");
 
 			var data = _adapter.GetResults(date);
 
-			OnOutput?.Invoke(this, $"{taskId}", $"Done");
+			// Общее количество событий за день
+			TotalEvents = CountEvents(data);
+
+			OutputMessage($"Done");
 
 			analogs = new List<Analog>();
 
-			OnOutput?.Invoke(this, $"{taskId}", $"Generating analogs");
+			OutputMessage($"Generating analogs");
 
 			foreach (var stage in data.Stages)
 			{
@@ -160,8 +182,8 @@ namespace Betgrab.Web.Services.LiveScore
 
 				foreach (var dtoEvent in stage.Events)
 				{
-					OnOutput?.Invoke(this, $"{taskId}", $"Processing event {dtoEvent.T1.First().Nm} - {dtoEvent.T2.First().Nm}");
-					OnOutput?.Invoke(this, $"{taskId}", $"Getting livescore json");
+					OutputEvent($"{dtoEvent.T1.First().Nm} - {dtoEvent.T2.First().Nm}");
+
 					var livescoreEventData = _adapter.GetEventData(dtoEvent.Eid);
 
 					analogs.Add(CreateAnalog<Event>(dtoEvent.Eid, new 
@@ -194,32 +216,34 @@ namespace Betgrab.Web.Services.LiveScore
 
 					#endregion
 
-					OnOutput?.Invoke(this, $"{taskId}", $"Done");
-					OnOutput?.Invoke(this, $"{taskId}", $"Generating analogs");
+					OutputMessage($"Done");
+					OutputMessage($"Generating analogs");
 
 					ParseEventInternal(livescoreEventData, date, out List<Analog> eventDataAnalogs);
 
-					OnOutput?.Invoke(this, $"{taskId}", $"Done");
+					OutputMessage($"Done");
 
 					analogs = analogs.Concat(eventDataAnalogs).ToList();
+
+					EventProcessed += 1;
+
+					OutputProgress();
 				}
 			}
 
-			OnOutput?.Invoke(this, $"{taskId}", $"Done");
+			OutputEvent($"All matches successfully processed!");
 
 			return 0;
 		}
 		public int ParseEventInternal(LivescoreEventDto dto, DateTime date, out List<Analog> analogs)
 		{
-			string taskId = date.ToString("yyyy-MM-dd");
-
 			analogs = new List<Analog>();
 
 			var dtoTeams = new[] { dto.T1.First(), dto.T2.First() };
 
 			#region Lu - составы команд
 
-			OnOutput?.Invoke(this, $"{taskId}", $"Line ups");
+			OutputMessage($"Line ups");
 
 			if (dto.Lu != null)
 			{
@@ -246,7 +270,7 @@ namespace Betgrab.Web.Services.LiveScore
 
 			#region Incs - что произошло во время матча
 
-			OnOutput?.Invoke(this, $"{taskId}", $"Incs");
+			OutputMessage($"Incs");
 
 			if (dto.Incs != null)
 			{
@@ -285,7 +309,10 @@ namespace Betgrab.Web.Services.LiveScore
 
 			return 0;
 		}
-
+		public int CountEvents(Web.Adapters.Livescore.Results.LiveScoreResponseDto dto)
+        {
+			return dto.Stages.SelectMany(s => s.Events).Count();
+        }
 		private Analog CreateAnalog<T>(string id, object data = null)
 		{
 			return new Analog
@@ -297,13 +324,19 @@ namespace Betgrab.Web.Services.LiveScore
 			};
 		}
 
+		#region Entity Updaters
+
 		private void UpdateNation(Analog a, Nation n)
 		{
 			n.Name = a.Json.CoNm;
+
+			Ctx.SaveChanges();
 		}
 		private void UpdateLeague(Analog a, League l)
 		{
 			l.Name = a.Json.Cnm;
+
+			Ctx.SaveChanges();
 		}
 		private void UpdateStage(Analog a, Stage s)
 		{
@@ -316,6 +349,8 @@ namespace Betgrab.Web.Services.LiveScore
 					? (int?)l.Id
 					: null;
 			}
+
+			Ctx.SaveChanges();
 		}
 		private void UpdateEvent(Analog a, Event e)
 		{
@@ -399,18 +434,19 @@ namespace Betgrab.Web.Services.LiveScore
 									dtoStats[i].Shbl, dtoStats[i].Shof, dtoStats[i].Shon,
 									dtoStats[i].Shwd, dtoStats[i].Ths, dtoStats[i].Tnb,
 									dtoStats[i].Trt, dtoStats[i].YRcs, dtoStats[i].Ycs,
-								}), 
+								}),
 							
 							stats
 						);
 
 						Ctx.EventStats.Add(stats);
 
-						Ctx.SaveChanges();
+						
 					}
 				}
 			}
 			catch (RuntimeBinderException) { }
+			finally { Ctx.SaveChanges(); }
 		}
 		private void UpdateClub(Analog a, Club c)
 		{
@@ -423,6 +459,8 @@ namespace Betgrab.Web.Services.LiveScore
 					? (int?)nation.Id
 					: null;
 			}
+			
+			Ctx.SaveChanges();
 		}
 		private void UpdatePlayer(Analog a, Player p)
 		{
@@ -443,6 +481,8 @@ namespace Betgrab.Web.Services.LiveScore
 						Ctx.ClubMember.Add(new ClubMember { PlayerId = p.Id, ClubId = club.Id });
 				}
 			}
+
+			Ctx.SaveChanges();
 		}
 		private void UpdateFact(Analog a, Fact f)
 		{
@@ -465,6 +505,8 @@ namespace Betgrab.Web.Services.LiveScore
 					? (int?)ev.Id
 					: null;
 			}
+
+			Ctx.SaveChanges();
 		}
 		private void UpdateEventStats(Analog a, EventStats s)
 		{
@@ -499,6 +541,25 @@ namespace Betgrab.Web.Services.LiveScore
 
 			// try { s.?? = a.Json.Shwd; } catch (RuntimeBinderException) { }
 			// try { s.?? = a.Json.Tnb; } catch (RuntimeBinderException) { }
+
+			Ctx.SaveChanges();
 		}
-	}
+
+		#endregion
+		
+        private void OutputMessage(string message) 
+		{
+			if (!EventOutputOnly)
+				OnOutput?.Invoke(this, TaskId, message);
+		}
+		private void OutputEvent(string message) 
+		{
+			OnOutput?.Invoke(this, TaskId, message);
+		}
+
+		private void OutputProgress() 
+		{
+			OnProgress?.Invoke(this, TaskId, Progress);
+		}
+    }
 }

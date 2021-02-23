@@ -1,0 +1,29 @@
+.param-row {
+   display: grid;
+   grid-gap: 1rem;
+   grid-template-columns: repeat(3, minmax(min-content, max-content));
+   align-items: center;
+}
+
+.outputs {
+  display: grid;
+  grid-gap: 1rem;
+  grid-auto-rows: auto;
+
+  & .output {
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    padding: .5rem;
+
+    // & pre {
+    //   font-size: 12px;
+    //   height: 100%;
+    //   overflow-y: auto;
+    //   font-family: 'Ubuntu';
+
+    //   & span {
+    //      display: block;
+    //   }
+    // }
+  }
+}

@@ -1,0 +1,46 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "start",
+			"path": "Betgrab.Web/ClientApp/",
+			"problemMatcher": [],
+			"group": "build",
+			"label": "npm: start - Betgrab.Web/ClientApp",
+			"detail": "ng serve"
+		},
+		{
+			"type": "npm",
+			"script": "build",
+			"path": "Betgrab.Web/ClientApp/",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: build - Betgrab.Web/ClientApp",
+			"detail": "ng build"
+		},
+		{
+            "label": "Build Betgrab Web",
+            "command": "dotnet build",
+            "type": "shell",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+		{
+            "label": "Run Betgrab Web",
+            "command": "dotnet watch run",
+            "type": "shell",
+            "group": "build",
+			"options": {
+				"cwd": "${workspaceFolder}/Betgrab.Web"
+			},
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        }
+	]
+}

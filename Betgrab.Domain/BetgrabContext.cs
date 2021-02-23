@@ -28,15 +28,17 @@ namespace Betgrab.Domain
 		{
 			base.OnConfiguring(optionsBuilder);
 
-			var conStr = _config.GetConnectionString("Betgrab");
+			var conStr = _config.GetConnectionString("NpgsqlBetgrab");
 
 			optionsBuilder
-				.UseSqlServer(conStr);
+				.UseNpgsql(conStr);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
+
+			modelBuilder.Entity<Club>().Property(e => e.Name).HasColumnType("varchar(2000)");
 
 			modelBuilder.Entity<Event>().HasOne(e => e.Club1).WithMany().HasForeignKey(e => e.Club1Id).OnDelete(DeleteBehavior.Restrict);
 			modelBuilder.Entity<Event>().HasOne(e => e.Club2).WithMany().HasForeignKey(e => e.Club2Id).OnDelete(DeleteBehavior.Restrict);

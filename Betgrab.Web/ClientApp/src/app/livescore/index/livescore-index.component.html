@@ -1,0 +1,20 @@
+
+<div class="param-row">
+  <div>
+    <label>Select date</label>
+  </div>
+  <div>
+    <input type="date" [(ngModel)]="parseDate" />
+  </div>
+  <div>
+    <button class="btn btn-primary" (click)="parseDay()">Start parsing</button>
+  </div>
+</div>
+
+<br />
+
+<div class="outputs">
+  <div *ngFor="let o of outputs" class="output">
+    <app-livescore-event [data]="o"></app-livescore-event>
+  </div>
+</div>
