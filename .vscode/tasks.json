@@ -12,6 +12,15 @@
 		},
 		{
 			"type": "npm",
+			"script": "install",
+			"path": "Betgrab.Web/ClientApp/",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: build - Betgrab.Web/ClientApp",
+			"detail": "npm install"
+		},
+		{
+			"type": "npm",
 			"script": "build",
 			"path": "Betgrab.Web/ClientApp/",
 			"group": "build",
